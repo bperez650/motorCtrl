@@ -23,20 +23,23 @@ volatile int speed;
 volatile int adjustedSpeed;
 volatile int normSpeed;
 
+
+
 int main (void){
 	
 	system_init();
 	clockSetup();
 	portSetup();
-	Timer4Setup();	
- 	Timer5Setup();
- 	Timer6Setup();
- 	EICsetup();
-	//NVIC->IP[1] = 0x0;	//EIC highest priority
-	//NVIC->IP[4] = 0x40C0;	//TC5 highest, TC6 mid priority
-	
-	NVIC->IP[1] = 0x80;	//EIC lowest priority
-	NVIC->IP[4] = 0x40000000;	//TC5 highest, TC6 mid priority
+	Timer4Setup();
+	Timer5Setup();
+	Timer6Setup();
+	EICsetup();
+
+	NVIC->IP[1] = 0x0;	//EIC highest priority
+	NVIC->IP[4] = 0x40C0;	//TC5 highest, TC6 mid priority
+	//
+	//NVIC->IP[1] = 0x80;	//EIC lowest priority
+	//NVIC->IP[4] = 0x40000000;	//TC5 highest, TC6 mid priority
 	
 	while(1){
 	}
@@ -139,165 +142,165 @@ void poll(void){
 
 	keyptr = array;
 
-		key='D';
-		///////////check first row////////////////
-		porA -> OUTCLR.reg = PORT_PA07;//turn on left SSD/top row of keypad
-		porA -> OUTSET.reg = PORT_PA04 | PORT_PA05 | PORT_PA06;//turn off other SSD/top row of keypad
-		//display(arrPtr);
+	key='D';
+	///////////check first row////////////////
+	porA -> OUTCLR.reg = PORT_PA07;//turn on left SSD/top row of keypad
+	porA -> OUTSET.reg = PORT_PA04 | PORT_PA05 | PORT_PA06;//turn off other SSD/top row of keypad
+	//display(arrPtr);
 
-		
-		if(porA->IN.reg&PORT_PA19){//checking PA19 for input
-			key='1';
-		}
-		if(porA->IN.reg&PORT_PA18){//checking PA18 for input
-			key='2';
-		}
-		if(porA->IN.reg&PORT_PA17){//checking PA17 for input
-			key='3';
-		}
-		if(porA->IN.reg&PORT_PA16)//checking PA16 for input 'A'
-		{
-			key='A';
-		}
-		//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
-		porA -> OUTSET.reg = PORT_PA07;//turn off left SSD/top row of keypad
-			wait(1);//this wait is so the numbers don't get mixed up
-
-
-		////////////check second row////////////////
-		porA -> OUTCLR.reg = PORT_PA06;//turn on left SSD/top row of keypad
-		//display((arrPtr+1));
-
-
-		if(porA->IN.reg&PORT_PA19)//checking PA19 for input
-		key='4';
-		
-		if(porA->IN.reg&PORT_PA18)//checking PA18 for input
-		key='5';
-		
-		if(porA->IN.reg&PORT_PA17)//checking PA17 for input
-		key='6';
 	
-		
-		//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
-		porA -> OUTSET.reg = PORT_PA06;//turn off left SSD/top row of keypad
-			wait(1);//this wait is so the numbers don't get mixed up
+	if(porA->IN.reg&PORT_PA19){//checking PA19 for input
+		key='1';
+	}
+	if(porA->IN.reg&PORT_PA18){//checking PA18 for input
+		key='2';
+	}
+	if(porA->IN.reg&PORT_PA17){//checking PA17 for input
+		key='3';
+	}
+	if(porA->IN.reg&PORT_PA16)//checking PA16 for input 'A'
+	{
+		key='A';
+	}
+	//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
+	porA -> OUTSET.reg = PORT_PA07;//turn off left SSD/top row of keypad
+	wait(1);//this wait is so the numbers don't get mixed up
+
+
+	////////////check second row////////////////
+	porA -> OUTCLR.reg = PORT_PA06;//turn on left SSD/top row of keypad
+	//display((arrPtr+1));
+
+
+	if(porA->IN.reg&PORT_PA19)//checking PA19 for input
+	key='4';
+	
+	if(porA->IN.reg&PORT_PA18)//checking PA18 for input
+	key='5';
+	
+	if(porA->IN.reg&PORT_PA17)//checking PA17 for input
+	key='6';
+	
+	
+	//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
+	porA -> OUTSET.reg = PORT_PA06;//turn off left SSD/top row of keypad
+	wait(1);//this wait is so the numbers don't get mixed up
 
 
 
-		////////////check third row////////////////
-		porA -> OUTCLR.reg = PORT_PA05;//turn on left SSD/top row of keypad
-		//display((arrPtr+2));
+	////////////check third row////////////////
+	porA -> OUTCLR.reg = PORT_PA05;//turn on left SSD/top row of keypad
+	//display((arrPtr+2));
 
 
-		if(porA->IN.reg&PORT_PA19)//checking PA19 for input
-		key='7';
-		
-		if(porA->IN.reg&PORT_PA18)//checking PA18 for input
-		key='8';
-		
-		if(porA->IN.reg&PORT_PA17)//checking PA17 for input
-		key='9';
-		
-		
-		//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
-		porA -> OUTSET.reg = PORT_PA05;//turn off left SSD/top row of keypad
-			wait(1);//this wait is so the numbers don't get mixed up
+	if(porA->IN.reg&PORT_PA19)//checking PA19 for input
+	key='7';
+	
+	if(porA->IN.reg&PORT_PA18)//checking PA18 for input
+	key='8';
+	
+	if(porA->IN.reg&PORT_PA17)//checking PA17 for input
+	key='9';
+	
+	
+	//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
+	porA -> OUTSET.reg = PORT_PA05;//turn off left SSD/top row of keypad
+	wait(1);//this wait is so the numbers don't get mixed up
 
 
-		////////////check fourth row////////////////
-		porA -> OUTCLR.reg = PORT_PA04;//turn on left SSD/top row of keypad
-		//display((arrPtr+3));
+	////////////check fourth row////////////////
+	porA -> OUTCLR.reg = PORT_PA04;//turn on left SSD/top row of keypad
+	//display((arrPtr+3));
 
-		if(porA->IN.reg&PORT_PA17){//checking PA17 for input '#'
-			key='#';
-		}
-		if(porA->IN.reg&PORT_PA18){//checking PA18 for input '0'
+	if(porA->IN.reg&PORT_PA17){//checking PA17 for input '#'
+		key='#';
+	}
+	if(porA->IN.reg&PORT_PA18){//checking PA18 for input '0'
 		key='0';
-		}
-		if(porA->IN.reg&PORT_PA19){//checking PA19 for input '*'
+	}
+	if(porA->IN.reg&PORT_PA19){//checking PA19 for input '*'
 		key = '*';
-		}
+	}
+	
+	//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
+	porA -> OUTSET.reg = PORT_PA04;//turn off left SSD/top row of keypad
+	wait(1);//this wait is so the numbers don't get mixed up
+	
+	switch(x){
+		case 0:				//state 0 checks for key pressed
+		if(key=='D'){
+		break;}
+		T1=key;
+		CNT=0;
+		x=1;
+		break;
 		
-		//	wait(1);//this wait is here because the LEDs are on/off so fast that i cannot even see them
-		porA -> OUTSET.reg = PORT_PA04;//turn off left SSD/top row of keypad
-			wait(1);//this wait is so the numbers don't get mixed up
-		
-		switch(x){
-			case 0:				//state 0 checks for key pressed
-			if(key=='D'){
-			break;}
-			T1=key;
-			CNT=0;
-			x=1;
-			break;
-			
-			case 1:				//state 1 denouncing initial press
-			if(key!=T1){
-				x=0;
-			break;}
-			CNT++;
-			if(CNT>N){	//pressed long enough
-				x=2;
-			break;}
-			break;
-			
-			case 2:				//state 2 process input
-			if(key!='D'){
-				CNT=0;
-				if(key == '#'){	//if spd key is detected reset array set mode
-					array[0] = '0';
-					array[1] = '0';
-					array[2] = '0';
-					array[3] = '0';
-					i = 0;
-					porB -> OUTSET.reg = PORT_PB09;	//turn off LED
-					mode = 0;	//set to speed ctrl
-				}
-				else if(key == '*'){	//if pos key is detected reset array set mode
-					array[0] = '0';
-					array[1] = '0';
-					array[2] = '0';
-					array[3] = '0';			
-					i = 0;
-					porB -> OUTCLR.reg = PORT_PB09;	//turn on LED
-					mode = 1;	//set to pos ctrl
-				}
-				else if( key == 'A'){	//'A' is the enter key
-					charConvert(keyptr);
-					array[0] = '0';
-					array[1] = '0';
-					array[2] = '0';
-					array[3] = '0';
-					i = 0;
-				}
-				else if(key != 'B' | 'C'){
-					array[i++]=key;	//reset array to loop back on itself
-					if(i>=4){
-					i=0;
-					}
-				}
-			}
-			CNT=0;
-			x=3;
-			break;
-			
-			case 3:				//state 3 denouncing release
-			if(key == 'D'){
-				CNT++;
-				if(CNT>N){	//released long enough then reset
-					CNT=0;
-					x=0;
-				}
-				break;
-			}
-			CNT = 0;
-			break;
-			
-			default:
+		case 1:				//state 1 denouncing initial press
+		if(key!=T1){
 			x=0;
+		break;}
+		CNT++;
+		if(CNT>N){	//pressed long enough
+			x=2;
+		break;}
+		break;
+		
+		case 2:				//state 2 process input
+		if(key!='D'){
+			CNT=0;
+			if(key == '#'){	//if spd key is detected reset array set mode
+				array[0] = '0';
+				array[1] = '0';
+				array[2] = '0';
+				array[3] = '0';
+				i = 0;
+				porB -> OUTSET.reg = PORT_PB09;	//turn off LED
+				mode = 0;	//set to speed ctrl
+			}
+			else if(key == '*'){	//if pos key is detected reset array set mode
+				array[0] = '0';
+				array[1] = '0';
+				array[2] = '0';
+				array[3] = '0';
+				i = 0;
+				porB -> OUTCLR.reg = PORT_PB09;	//turn on LED
+				mode = 1;	//set to pos ctrl
+			}
+			else if( key == 'A'){	//'A' is the enter key
+				charConvert(keyptr);
+				array[0] = '0';
+				array[1] = '0';
+				array[2] = '0';
+				array[3] = '0';
+				i = 0;
+			}
+			else if(key != 'B' | 'C'){
+				array[i++]=key;	//reset array to loop back on itself
+				if(i>=4){
+					i=0;
+				}
+			}
+		}
+		CNT=0;
+		x=3;
+		break;
+		
+		case 3:				//state 3 denouncing release
+		if(key == 'D'){
+			CNT++;
+			if(CNT>N){	//released long enough then reset
+				CNT=0;
+				x=0;
+			}
 			break;
 		}
+		CNT = 0;
+		break;
+		
+		default:
+		x=0;
+		break;
+	}
 }
 
 void charConvert(char *a){	//gives value of keypad for spd/pos ctrl
@@ -331,7 +334,7 @@ void Timer4Setup(void){	//for wavegen only should be in timer int 2
 	TcCount8 *tc4 = &tcc->COUNT8;
 	tc4->CTRLA.reg = 0;	//disable the TC4
 	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync of disable
-	tc4->CTRLA.bit.PRESCALER = 0;	//divide by 1;
+	tc4->CTRLA.bit.PRESCALER = 6;	//divide by 1;
 	tc4->CTRLA.bit.WAVEGEN = 2;	//normal PWM frequency per=period, CC1/CC0=compare value
 	tc4->CTRLA.bit.MODE = 1;	//8 bit mode
 	tc4->PER.reg = 0xff;
@@ -340,20 +343,20 @@ void Timer4Setup(void){	//for wavegen only should be in timer int 2
 	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync to complete
 	tc4->CTRLA.reg |= 1<<1;	//enable the TC4
 	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync of enable
-	tc4->CC[0].reg = 0;	
+	tc4->CC[0].reg = 0;
 	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync of disable
-	tc4->CC[1].reg = 0;	
+	tc4->CC[1].reg = 0;
 	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync of disable
-	//tc4->CTRLC.bit.INVEN1 = 1;
+	tc4->CTRLC.bit.INVEN1 = 1;
 	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync
 }
 
-void Timer5Setup(void){	//for keylogging	60Hz
+void Timer5Setup(void){	//for keylogging 60Hz
 	Tc *tc = TC5;
 	TcCount8 *tc5 = &tc->COUNT8;
 	tc5->CTRLA.reg = 0;	//disable the TC5
 	while(tc5->STATUS.bit.SYNCBUSY){}	//wait for sync of disable
-	tc5->CTRLA.bit.PRESCALER = 0x7;	//divide by 1;
+	tc5->CTRLA.bit.PRESCALER = 7;	//divide by 1;
 	tc5->CTRLA.bit.MODE = 1;	//8 bit mode
 	tc5->PER.reg = 0x82;
 	tc5->CTRLBSET.bit.ONESHOT = 0;	//turn off one shot mode
@@ -383,7 +386,7 @@ void Timer6Setup(void){	//for rpm	200hz
 
 }
 
-void EIC_Handler(void){	
+void EIC_Handler(void){
 	Port *por = PORT;
 	PortGroup *porB = &(por->Group[1]);
 	porB->DIRSET.reg = PORT_PB16;
@@ -398,8 +401,8 @@ void EIC_Handler(void){
 	countEICs++;
 }
 
-TC5_Handler(){	//60Hz
-	poll();
+TC5_Handler(){	//60Hz 
+	poll();			//read keypad
 	Tc *tc = TC5;
 	TcCount8 *tc5 = &tc->COUNT8;
 	//Port *por = PORT;
@@ -407,6 +410,11 @@ TC5_Handler(){	//60Hz
 	//porB->DIRSET.reg = PORT_PB16;
 	//porB->OUTTGL.reg = PORT_PB16;		//test frequency
 	tc5->INTFLAG.bit.OVF = 1;
+	
+	
+	//*********** insert display function *********************************
+	
+	
 }
 
 void TC6_Handler(void){	//for RPM spd ctrl	200hz
@@ -414,66 +422,57 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 	//PortGroup *porB = &(por->Group[1]);
 	//porB->DIRSET.reg = PORT_PB16;
 	//porB->OUTTGL.reg = PORT_PB16;		//test frequency
-	volatile static float x=0;
-	volatile static float y=0;
-	volatile static float y1=0;
-	volatile static float x1=0;
-	temp1 = countEICs*(60*200/400);//RPM calculation
+	volatile static float x=1;
+	volatile static float y=1;
+	volatile static float y1=1;
+	volatile static float x1=1;
+	volatile static int diff=1;
 	
-	//x = countEICs*(60*200/400) ;//RPM calculation
-	//y = (0.9691*y1) + (0.03093*x1);
-	//temp1=y;
- 	//y1=y;
- 	//x1=x;
-	speed = temp1;
-	countEICs = 0;
-	static int kicker = 50;
 	Tc *tc = TC6;
 	TcCount8 *tc6 = &tc->COUNT8;
-	tc6->INTFLAG.bit.OVF = 1;	//clear the interrupt
+ 	Tc *tcc = TC4;
+ 	TcCount8 *tc4 = &tcc->COUNT8;
+	 
+	speed = countEICs*(60*200/400);// raw RPM calculation
+
+ 	//x = countEICs*(60*200/400) ;				//low pass RPM display 
+ 	//y = (0.9691*y1) + (0.03093*x1);
+ 	//speed=y;
+ 	//y1=y;
+ 	//x1=x;
+
 	switch(mode){
-		
 		case 0:	//spd ctrl
 		compare(keypad);
-
- 		if(comPres == 0){
-			 //if(speed < 1500){
-				 //Tc *tcc = TC4;
-				 //TcCount8 *tc4 = &tcc->COUNT8;
-				//tc4->CC[0].reg = 10*kicker;
-				//kicker++;
-			 //}
-			 //else{
-				 //kicker = 0;
-			 //}
- 			adjustedSpeed = (speed + 500);	//speed ++
- 		}
- 		else if(comPres == 1){
- 			adjustedSpeed = (speed - 500);	//speed --
- 		}
- 		else if(comPres == 2){
- 			//adjustedSpeed = 0;	//kill motor
-		
-		
-		break;
-		}
-		case 1: //pos ctrl
-		compare(keypad);
+			if(keypad==0){
+				break;
+			}
+ 			if(comPres == 0){
+ 				adjustedSpeed++;	//speed ++
+ 			}
+ 			else if(comPres == 1){
+ 				adjustedSpeed--;	//speed --
+ 			}
+ 			else if(comPres == 2){
+ 				//adjustedSpeed = 0;	
+ 			}
 		break;
 		
+ 		case 1: //pos ctrl
+ 		compare(keypad);
+ 		break;
+		 
 		default:
 		break;
 	}
-	Tc *tcc = TC4;
-	TcCount8 *tc4 = &tcc->COUNT8;
-	normSpeed = ((adjustedSpeed * 250) / 5000);
- 	//normSpeed = ((keypad * 250) / 5000);
-
-	tc4->CC[0].reg = normSpeed;
-	//tc4->CC[1].reg = normSpeed;
-	while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync of disable
-	//tc6->INTFLAG.bit.OVF = 1;	//clear the interrupt
-
+ 	 normSpeed = (((adjustedSpeed * 255)/5000)+128);
+ 
+ 	 tc4->CC[0].reg = normSpeed;
+ 	 tc4->CC[1].reg = normSpeed;
+	 while(tc4->STATUS.bit.SYNCBUSY){}	//wait for sync of disable
+	 
+ 	countEICs = 0;
+	tc6->INTFLAG.bit.OVF = 1;	//clear the interrupt
 }
 
 void compare(int a){
