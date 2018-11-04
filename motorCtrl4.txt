@@ -6,10 +6,10 @@
 //#define Kff (1 / 23.26)
 
 volatile const float Ts = .005;
-volatile const float Kp = 1.5;
-volatile const float Ki = 0;
+volatile const float Kp = .20;
+volatile const float Ki = 1.5;
 volatile const float Kff = .00;
-volatile const float Kd = 0.1;
+volatile const float Kd = 00;
 
 
 void clockSetup(void);
@@ -31,7 +31,7 @@ volatile int keypad;
 volatile int comPres;
 volatile int temp2 = 0;	//for direction of encoder
 volatile static int countEICs = 0;
-volatile int temp1 = 0;
+//volatile int temp1 = 0;
 volatile int rawSpeed;
 volatile char ConArray[4];
 volatile char *ConArrayPtr;
@@ -46,6 +46,12 @@ volatile float x;
 volatile int normY;
 volatile int temp;
 volatile int temp1;
+volatile float filterY = 0;
+volatile float filterY1 = 0;
+volatile float filterX1 = 0;
+volatile int filterRawSpeed = 0;
+
+
 
 
 
@@ -62,7 +68,7 @@ int main (void){
 	ConArrayPtr = ConArray;
 
 	NVIC->IP[1] = 0x0;	//EIC highest priority
-	NVIC->IP[4] = 0x40C0;	//TC5 lowest, TC6 mid priority
+	NVIC->IP[5] = 0x40C0;	//TC5 lowest, TC6 mid priority
 	//
 	//NVIC->IP[1] = 0x80;	//EIC lowest priority
 	//NVIC->IP[4] = 0x40000000;	//TC5 highest, TC6 mid priority
@@ -463,26 +469,26 @@ TC5_Handler(){	//60Hz
 	tc5->INTFLAG.bit.OVF = 1;
 	
 	//*********** insert display function *********************************
-	//convert(rawSpeed);
-	//porA->OUTCLR.reg = 	PORT_PA07;
-	//display(ConArrayPtr);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA07;
-//
-	//porA->OUTCLR.reg = 	PORT_PA06;
-	//display(ConArrayPtr + 1);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA06;
-	//
-	//porA->OUTCLR.reg = 	PORT_PA05;
-	//display(ConArrayPtr + 2);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA05;
-	//
-	//porA->OUTCLR.reg = 	PORT_PA04;
-	//display(ConArrayPtr + 3);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA04;
+	convert(filterRawSpeed);
+	porA->OUTCLR.reg = 	PORT_PA07;
+	display(ConArrayPtr);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA07;
+
+	porA->OUTCLR.reg = 	PORT_PA06;
+	display(ConArrayPtr + 1);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA06;
+	
+	porA->OUTCLR.reg = 	PORT_PA05;
+	display(ConArrayPtr + 2);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA05;
+	
+	porA->OUTCLR.reg = 	PORT_PA04;
+	display(ConArrayPtr + 3);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA04;
 	
 }
 
@@ -505,12 +511,13 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
  	TcCount8 *tc4 = &tcc->COUNT8;
 	 
 	rawSpeed = countEICs * (60*200/400);// raw RPM calculation
-
- 	//x = countEICs*(60*200/400) ;				//low pass RPM display 
- 	//y = (0.9691*y1) + (0.03093*x1);
- 	//speed=y;
- 	//y1=y;
- 	//x1=x;
+	
+	////digital filter//////
+	filterY = (0.9691*filterY1) + (0.03093*filterX1);
+ 	filterY1 = filterY;
+ 	filterX1 = rawSpeed;
+	filterRawSpeed = filterY;
+ 	
 
 	switch(mode){
 		
@@ -524,9 +531,9 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 		else{	//spd control selected and keys
 			
 			errorSpd = keypad - rawSpeed;
-			//if((errorSpd < 50) && (errorSpd > -50)){	//at rpm 
-				//break;
-			//}
+			if((errorSpd < 150) && (errorSpd > -150)){	//at rpm 
+				break;
+			}
 			integral = integral + (Ts * errorSpd);
 			Diff = ((errorSpd - errorSpd1) / Ts);
 			y = (Kp * errorSpd) + (Ki * integral) + (Kd * Diff) + (Kff * keypad);
@@ -541,6 +548,8 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 			}
 	 
 			normY = (((y * 127)/5000)+127);
+			
+
 	 
 			if((y < 138) && (y > 118)){	//buffer for middle
 				tc4->CC[0].reg = 0;
