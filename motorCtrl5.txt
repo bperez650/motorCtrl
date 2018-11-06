@@ -5,18 +5,18 @@
 //#define Ki 3.785
 //#define Kff (1 / 23.26)
 
-/////dpeed //////
-//volatile const float Ts = .005;
-//volatile const float Kp = .20;
-//volatile const float Ki = 1.5;
-//volatile const float Kff = .00;
-//volatile const float Kd = 00;
-
+/////speed //////
 volatile const float Ts = .005;
-volatile const float Kp = .01;
-volatile const float Ki = .000005;
-volatile const float Kff = .00;
-volatile const float Kd = .000001;
+volatile const float Kps = .2;
+volatile const float Kis = 1.1;
+volatile const float Kffs = .00;
+volatile const float Kds = .0001;
+
+/////position//////
+volatile const float Kpp = .1;
+volatile const float Kip = 0.25;
+volatile const float Kffp = .00;
+volatile const float Kdp = .0;
 
 
 void clockSetup(void);
@@ -46,7 +46,9 @@ volatile int errorSpd;
 volatile static int errorSpd1;
 volatile int errorPos;
 volatile static int errorPos1;
+volatile int errorDisplay;
 volatile static float integral;
+volatile static float integralx;
 volatile float Diff;
 volatile float Diffx;
 volatile float y;
@@ -473,31 +475,38 @@ TC5_Handler(){	//60Hz
 	TcCount8 *tc5 = &tc->COUNT8;
 	Port *por = PORT;
 	PortGroup *porA = &(por->Group[0]);
+	//PortGroup *porB = &(por->Group[1]);
 	//porB->DIRSET.reg = PORT_PB16;
 	//porB->OUTTGL.reg = PORT_PB16;		//test frequency
 	tc5->INTFLAG.bit.OVF = 1;
 	
 	//*********** insert display function *********************************
-	//convert(filterRawSpeed);
-	//porA->OUTCLR.reg = 	PORT_PA07;
-	//display(ConArrayPtr);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA07;
-//
-	//porA->OUTCLR.reg = 	PORT_PA06;
-	//display(ConArrayPtr + 1);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA06;
-	//
-	//porA->OUTCLR.reg = 	PORT_PA05;
-	//display(ConArrayPtr + 2);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA05;
-	//
-	//porA->OUTCLR.reg = 	PORT_PA04;
-	//display(ConArrayPtr + 3);
-	//wait(1);
-	//porA->OUTSET.reg = 	PORT_PA04;
+	if(mode == 0){
+		convert(filterRawSpeed);
+	}
+	
+	else{
+		convert(errorDisplay);
+	}
+	porA->OUTCLR.reg = 	PORT_PA07;
+	display(ConArrayPtr);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA07;
+
+	porA->OUTCLR.reg = 	PORT_PA06;
+	display(ConArrayPtr + 1);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA06;
+	
+	porA->OUTCLR.reg = 	PORT_PA05;
+	display(ConArrayPtr + 2);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA05;
+	
+	porA->OUTCLR.reg = 	PORT_PA04;
+	display(ConArrayPtr + 3);
+	wait(1);
+	porA->OUTSET.reg = 	PORT_PA04;
 	
 }
 
@@ -543,12 +552,13 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 		else{	//spd control selected and keys
 			
 			errorSpd = keypad - rawSpeed;
-			if((errorSpd < 150) && (errorSpd > -150)){	//at rpm 
+			if((errorSpd < 50) && (errorSpd > -50)){	//at rpm 
 				break;
 			}
+			
 			integral = integral + (Ts * errorSpd);
 			Diff = ((errorSpd - errorSpd1) / Ts);
-			y = (Kp * errorSpd) + (Ki * integral) + (Kd * Diff) + (Kff * keypad);
+			y = (Kps * errorSpd) + (Kis * integral) + (Kds * Diff) + (Kffs * keypad);
 			errorSpd1 = errorSpd;
 			
 			if(y > 5000){
@@ -560,8 +570,7 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 			}
 	 
 			normY = (((y * 127)/5000)+127);
-			
-
+		
 	 
 			if((y < 138) && (y > 118)){	//buffer for middle
 				tc4->CC[0].reg = 0;
@@ -584,7 +593,7 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 				countEICs = 0;
 			}
 			errorPos = countEICs;
-			if((errorPos > -25) && (errorPos < 25)){
+			if((errorPos > -5) && (errorPos < 5)){
 				tc4->CC[0].reg = 0;
 				tc4->CC[1].reg = 255;
 				i++;
@@ -599,18 +608,21 @@ void TC6_Handler(void){	//for RPM spd ctrl	200hz
 				temp1 = (int)temp;
 				temp -= temp1;
 				errorPos = (-400 * temp);
+				errorDisplay = errorPos * -1;
 				}
 			}
 			else if(temp != 0){
 				temp1 = (int)temp;
 				temp -= temp1;
 				errorPos = (400 * temp);
+				errorDisplay = errorPos;
+				
 			}
 			
-			integral = integral + (Ts * errorPos);
+			integralx = integralx + (Ts * errorPos);
 			Diffx = ((errorPos - errorPos1) / Ts);
 
-			x = (Kp * errorPos) + (Ki * integral) + (Kd * Diffx);
+			x = (Kpp * errorPos) + (Kip * integralx) + (Kdp * Diffx);
 			
 			if(x > 128){
 				x = 128;
